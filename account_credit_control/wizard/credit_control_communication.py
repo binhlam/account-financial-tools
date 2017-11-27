@@ -162,7 +162,6 @@ class CreditCommunication(models.TransientModel):
     def _generate_emails(self):
         """ Generate email message using template related to level """
         emails = self.env['mail.mail']
-        attachments = self.env['ir.attachment']
         required_fields = ['subject',
                            'body_html',
                            'email_from',
@@ -170,7 +169,7 @@ class CreditCommunication(models.TransientModel):
         for comm in self:
             template = comm.current_policy_level.email_template_id
             email_values = template.generate_email(comm.id)
-            email_values['type'] = 'email'
+            email_values['message_type'] = 'email'
             # model is Transient record (self) removed periodically so no point
             # of storing res_id
             email_values.pop('model', None)
@@ -188,7 +187,7 @@ class CreditCommunication(models.TransientModel):
 
             comm.credit_control_line_ids.write({'mail_message_id': email.id,
                                                 'state': state})
-
+            attachments = self.env['ir.attachment']
             for att in email_values.get('attachments', []):
                 attach_fname = att[0]
                 attach_datas = att[1]
